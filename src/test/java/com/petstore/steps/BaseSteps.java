@@ -8,10 +8,10 @@ import java.io.File;
  * incluyendo URL base, payloads, respuestas y archivos.
  */
 public class BaseSteps {
-    private String baseUrl = "http://localhost:8080/api/v3"; // URL base para las solicitudes
+    private String baseUrl = "https://petstore3.swagger.io/api/v3";
     private String payload; // Almacena el payload JSON
     private Response response; // Almacena la respuesta HTTP
-    private File imageFile; // Almacena el archivo de imagen para subir
+    public File imageFile; // Almacena el archivo de imagen para subir
 
     // Obtener la URL base
     public String getBaseUrl() {

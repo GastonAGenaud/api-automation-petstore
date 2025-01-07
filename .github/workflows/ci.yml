@@ -1,4 +1,4 @@
-name: Petstore API CI/CD (Local Build)
+name: Petstore API CI/CD (Build and Test Only)
 
 on:
   push:
@@ -12,7 +12,7 @@ on:
 
 jobs:
   build-and-test:
-    name: Build Petstore API Locally and Run Java Tests
+    name: Build and Run Java Tests Against Public Swagger API
     runs-on: ubuntu-latest
 
     steps:
@@ -20,14 +20,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # ✅ Step 2: Clone Swagger Petstore API (Dynamic Branch Selection)
-      - name: Clone Swagger Petstore API
-        run: |
-          git clone https://github.com/swagger-api/swagger-petstore.git
-          cd swagger-petstore
-          git checkout $(git branch -r | grep -E 'origin/(main|master)' | sed 's/origin\///' | head -n 1)
-
-      # ✅ Step 3: Set Up Java Environment
+      # ✅ Step 2: Set Up Java Environment
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
@@ -35,63 +28,20 @@ jobs:
           java-version: '17'
           cache: maven
 
-      # ✅ Step 4: Update Maven WAR Plugin
-      - name: Update Maven WAR Plugin
-        run: |
-          cd swagger-petstore
-          mvn versions:use-latest-versions -Dincludes=org.apache.maven.plugins:maven-war-plugin
-          mvn versions:commit
-
-      # ✅ Step 5: Build Swagger Petstore API
-      - name: Build Petstore API
-        run: |
-          cd swagger-petstore
-          mvn clean install -DskipTests
-
-      # ✅ Step 6: Start Swagger Petstore API
-      - name: Start Petstore API
-        run: |
-          cd swagger-petstore
-          java -jar target/swagger-petstore-server.jar &
-          sleep 20
-
-      # ✅ Step 7: Verify Petstore API is Running
-      - name: Verify Petstore API is Running
-        run: |
-          curl --retry 5 --retry-delay 5 --retry-connrefused http://localhost:8080/api/v3/openapi.json
-
-      # ✅ Step 8: Install Dependencies for Tests
+      # ✅ Step 3: Install Dependencies
       - name: Install Maven Dependencies
         run: |
-          cd swagger-petstore
           mvn clean install -DskipTests
 
-      # ✅ Step 9: Run API Tests
-      - name: Run Tests
+      # ✅ Step 4: Run API Tests Against Public Swagger URL
+      - name: Run Tests Against Public Swagger API
         run: |
-          cd swagger-petstore
-          mvn test
+          mvn test -Dapi.base.url=https://petstore3.swagger.io/api/v3
 
-      # ✅ Step 10: Upload Test Results
+      # ✅ Step 5: Upload Test Results
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
-          path: swagger-petstore/target/surefire-reports
-
-      # ✅ Step 11: Archive Swagger Petstore Logs
-      - name: Archive Logs
-        if: always()
-        run: |
-          docker ps -a
-          docker logs $(docker ps -q -f ancestor=swaggerapi/petstore3) > petstore-api.log || echo "No container logs found"
-        shell: bash
-
-      # ✅ Step 12: Upload API Logs
-      - name: Upload API Logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: petstore-api-logs
-          path: petstore-api.log
+          path: target/surefire-reports
