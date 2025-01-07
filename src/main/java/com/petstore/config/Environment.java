@@ -9,18 +9,23 @@ public class Environment {
 
     static {
         try {
-            // Por defecto, leemos 'dev'
-            String environment = System.getProperty("env", "dev"); 
+            String environment = System.getProperty("env", "dev");
             String filePath = "src/test/resources/config/application-" + environment + ".properties";
+            System.out.println("📚 Loading environment from: " + filePath);
+
             FileInputStream input = new FileInputStream(filePath);
             properties.load(input);
+            input.close();
+
+            System.out.println("🌍 Base URL: " + properties.getProperty("base.url"));
+            System.out.println("🔑 Auth Token: " + properties.getProperty("auth.token"));
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load environment properties", e);
+            throw new RuntimeException("❌ Failed to load environment properties", e);
         }
     }
 
     public static String getBaseUrl() {
-        return properties.getProperty("base.url", "http://localhost:8080/api/v3");
+        return properties.getProperty("base.url", "/pet/1");
     }
 
     public static String getAuthToken() {
