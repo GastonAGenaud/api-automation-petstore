@@ -1,5 +1,6 @@
 package com.petstore.hooks;
 
+import com.petstore.config.Environment;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.restassured.RestAssured;
@@ -8,14 +9,23 @@ public class TestHooks {
 
     @Before
     public void setup() {
-        // Ajusta la URL a la que quieras apuntar
-        RestAssured.baseURI = System.getProperty("base.url", "http://localhost:8080/api/v3");
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-        System.out.println("🚀 Test Environment Setup Complete!");
+        RestAssured.baseURI = Environment.getBaseUrl();
+        RestAssured.requestSpecification = RestAssured
+                .given()
+                .header("Authorization", "Bearer " + Environment.getAuthToken())
+                .header("Content-Type", "application/json");
+
+        System.out.println("🌍 Base URL Configured: " + RestAssured.baseURI);
+        System.out.println("🔑 Auth Token: " + Environment.getAuthToken());
     }
 
     @After
     public void teardown() {
         System.out.println("✅ Test Execution Completed!");
+        if (RestAssured.baseURI == null) {
+            System.err.println("❌ Base URI is not set correctly.");
+        }
     }
+
 }
