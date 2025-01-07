@@ -34,16 +34,28 @@ Feature: Pet API management
     Given I have the following updated pet payload:
       """
       {
-        "id": 1,
-        "name": "doggie_updated",
-        "status": "sold"
+      "id": 1,
+      "name": "doggie",
+      "category": {
+      "id": 1,
+      "name": "Dogs"
+      },
+      "photoUrls": [
+      "string"
+      ],
+      "tags": [
+      {
+      "id": 0,
+      "name": "string"
+      }
+      ],
+      "status": "available"
       }
       """
     When I send a "PUT" request to "/pet"
     Then I should receive a status code 200 for pet operation
     And The response should have the pet ID "1"
     And The response should have the status "sold"
-
 
   @FindPetsByStatus
   Scenario: Retrieve pets by status

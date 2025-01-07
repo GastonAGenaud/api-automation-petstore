@@ -59,8 +59,8 @@ public class StoreSteps {
         Assert.assertEquals(statusCode.intValue(), baseSteps.getResponse().getStatusCode());
     }
 
-    @Then("The response should contain an error message {string}")
-    public void the_response_should_contain_an_error_message(String errorMessage) {
+    @Then("The store response should contain an error message {string}")
+    public void the_store_response_should_contain_an_error_message(String errorMessage) {
         Assert.assertTrue(baseSteps.getResponse().getBody().asString().contains(errorMessage));
     }
 }

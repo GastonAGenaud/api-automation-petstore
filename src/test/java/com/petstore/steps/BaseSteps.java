@@ -8,10 +8,11 @@ import java.io.File;
  * incluyendo URL base, payloads, respuestas y archivos.
  */
 public class BaseSteps {
-    private String baseUrl = "https://petstore3.swagger.io/api/v3";
+    private String baseUrl = System.getProperty("api.baseUrl", "https://petstore3.swagger.io/api/v3");
     private String payload; // Almacena el payload JSON
     private Response response; // Almacena la respuesta HTTP
-    public File imageFile; // Almacena el archivo de imagen para subir
+    private File imageFile; // Almacena el archivo de imagen para subir
+    private String authToken; // Token de autenticación
 
     // Obtener la URL base
     public String getBaseUrl() {
@@ -40,12 +41,21 @@ public class BaseSteps {
 
     // Obtener el archivo de imagen
     public File getImageFile() {
-        return new File("src/test/resources/pet_image.jpg");
+        return imageFile != null ? imageFile : new File("src/test/resources/pet_image.jpg");
     }
-
 
     // Configurar el archivo de imagen
     public void setImageFile(File imageFile) {
         this.imageFile = imageFile;
+    }
+
+    // Obtener el token de autenticación
+    public String getAuthToken() {
+        return authToken;
+    }
+
+    // Configurar el token de autenticación
+    public void setAuthToken(String authToken) {
+        this.authToken = authToken;
     }
 }

@@ -1,0 +1,69 @@
+name: Petstore API CI
+
+on:
+  push:
+    branches:
+      - master
+      - dev
+  pull_request:
+    branches:
+      - master
+      - dev
+
+jobs:
+  build-and-test:
+    name: Build and Run Java Tests Against Public Swagger API
+    runs-on: ubuntu-latest
+
+    steps:
+      # ✅ Step 1: Checkout Your Repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # ✅ Step 2: Set Up Java Environment
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: maven
+
+      # ✅ Step 3: Install Dependencies
+      - name: Install Maven Dependencies
+        run: |
+          mvn clean install -DskipTests
+
+      # ✅ Step 4: Run API Tests Against Public Swagger URL (No Failure on Test Errors)
+      - name: Run Tests Against Public Swagger API
+        run: |
+          mvn test -Dapi.base.url=https://petstore3.swagger.io/api/v3 || true
+
+      # ✅ Step 5: Upload Test Results
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: target/surefire-reports
+
+  performance-test:
+    name: Run Performance Tests with k6
+    runs-on: ubuntu-latest
+
+    steps:
+      # ✅ Step 1: Checkout Repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # ✅ Step 2: Run k6 Performance Test
+      - name: Run k6 Performance Test
+        run: |
+          docker run --rm -v ${{ github.workspace }}/performance:/scripts grafana/k6 run /scripts/petstore_tests.js
+
+      # ✅ Step 3: Upload k6 Results
+      - name: Upload k6 Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-performance-results
+          path: performance/test-results

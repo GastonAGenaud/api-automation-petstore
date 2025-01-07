@@ -16,6 +16,11 @@ public class PetSteps {
         this.baseSteps = baseSteps;
     }
 
+    @Then("The pet response should contain an error message {string}")
+    public void the_pet_response_should_contain_an_error_message(String errorMessage) {
+        Assert.assertTrue(baseSteps.getResponse().getBody().asString().contains(errorMessage));
+    }
+
     @Given("A pet with ID {string} exists")
     public void a_pet_with_ID_exists(String id) {
         Response response = RestAssured.given()
