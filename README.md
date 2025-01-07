@@ -2,7 +2,7 @@
 
 ## 📚 **Project Overview**
 
-Hi, I'm **Gaston Genaud**, and this repository showcases my approach to **API automation testing** for the **Petstore API (OpenAPI v3)**. Using **Java**, **RestAssured**, **Cucumber**, and **JUnit**, I have designed robust test cases to validate the core functionalities of the Petstore endpoints. The project is built with **Maven** and integrates a **GitHub Actions CI/CD pipeline** to ensure continuous quality assurance.
+Hi, I'm **Gaston Genaud**, and this repository showcases my approach to **API automation testing** for the **Petstore API (OpenAPI v3)**. Using **Java**, **RestAssured**, **Cucumber**, and **JUnit**, I have designed robust test cases to validate the core functionalities of the Petstore endpoints. The project is built with **Maven** and integrates a **GitHub Actions CI/CD pipeline** to ensure continuous quality assurance. Additionally, performance testing is carried out using **k6**.
 
 ---
 
@@ -14,9 +14,10 @@ Hi, I'm **Gaston Genaud**, and this repository showcases my approach to **API au
 4. [Running Tests](#running-tests)
 5. [Implemented Features](#implemented-features)
 6. [CI/CD Pipeline with GitHub Actions](#cicd-pipeline-with-github-actions)
-7. [Sample Test Case](#sample-test-case)
-8. [Contribution](#contribution)
-9. [License](#license)
+7. [Performance Testing with k6](#performance-testing-with-k6)
+8. [Sample Test Case](#sample-test-case)
+9. [Contribution](#contribution)
+10. [License](#license)
 
 ---
 
@@ -27,6 +28,8 @@ Hi, I'm **Gaston Genaud**, and this repository showcases my approach to **API au
 - **RestAssured** – REST API testing library.
 - **JUnit** – Testing framework for assertions and validations.
 - **Cucumber** – Behavior-Driven Development (BDD) framework.
+- **k6** – Performance testing tool.
+- **Docker** – Containerization tool for k6.
 - **GitHub Actions** – CI/CD pipeline for automated builds and test execution.
 
 ---
@@ -48,6 +51,9 @@ src/
 │   │   │   ├── Pet.feature
 │   │   ├── config/
 │   │   │   ├── application-dev.properties <-- Environment configuration
+performance/
+│   ├── petstore_tests.js            <-- k6 Performance Test Script
+│   ├── test-results/                <-- Performance test results
 pom.xml  <-- Maven dependencies
 README.md  <-- Documentation
 ```
@@ -119,42 +125,59 @@ Each scenario includes comprehensive validations such as:
 I have set up a **CI/CD pipeline** using **GitHub Actions** to ensure continuous integration and delivery.
 
 ### 📄 **Workflow Configuration: `.github/workflows/api-tests.yml`**
-```yaml
-name: API Automation Tests
 
-on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
+The pipeline consists of two jobs:
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
+### 🔹 **1. build-and-test**
 
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v3
+1. **Checkout Repository:** Clone the repository.
+2. **Set Up Java:** Install Java 17 and configure Maven cache.
+3. **Install Dependencies:** Install Maven dependencies without running tests.
+4. **Run Tests:** Execute API tests against the Petstore API.
+5. **Upload Test Results:** Test reports are uploaded as artifacts.
 
-    - name: Set up JDK
-      uses: actions/setup-java@v3
-      with:
-        java-version: '11'
-        distribution: 'temurin'
+### 🔹 **2. performance-test**
 
-    - name: Install Dependencies
-      run: mvn clean install
+1. **Checkout Repository:** Clone the repository.
+2. **Run k6 Performance Test:**
+   - Use `grafana/k6` Docker image.
+   - Execute performance tests defined in `performance/petstore_tests.js`.
+3. **Upload k6 Test Results:** Save performance test reports as artifacts.
 
-    - name: Run Tests
-      run: mvn test
+**k6 Command Used in Pipeline:**
+```bash
+docker run --rm -v $(pwd)/performance:/scripts grafana/k6 run /scripts/petstore_tests.js
 ```
 
-### ✅ **Pipeline Steps:**
-1. Clone the Repository
-2. Set Up Java Environment
-3. Install Dependencies
-4. Execute Tests
-5. Generate Test Reports
+### ✅ **Pipeline Steps Summary**
+
+| Job              | Description                     |
+|-------------------|---------------------------------|
+| `build-and-test` | Build the project and run tests |
+| `performance-test` | Run k6 performance tests |
+
+---
+
+## 📊 **Performance Testing with k6**
+
+Performance tests are designed to evaluate the scalability and responsiveness of the Petstore API under different conditions.
+
+### 🔑 **Run Performance Tests Locally:**
+```bash
+docker run --rm -v $(pwd)/performance:/scripts grafana/k6 run /scripts/petstore_tests.js
+```
+
+### 📊 **Metrics Collected:**
+- Response Time
+- Throughput
+- Error Rate
+- Requests per Second
+
+### 📂 **Results Location:**
+Performance test results are stored in:
+```
+performance/test-results
+```
 
 ---
 
@@ -184,5 +207,8 @@ Scenario: Create a new pet
 
 ## ✉️ **Contact**
 
-**Gaston Genaud** – 🚀 *QA Automation Engineer*
-gastongenaudar@gmail.com
+**Gaston Genaud** – 🚀 *QA Automation Engineer*  
+📧 **gastongenaudar@gmail.com**
+
+---
+
