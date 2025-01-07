@@ -1,4 +1,4 @@
-name: API Performance
+name: Petstore API CI
 
 on:
   push:
@@ -16,11 +16,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ✅ Step 1: Checkout Repository
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # ✅ Step 2: Set Up Java Environment
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
@@ -28,17 +26,14 @@ jobs:
           java-version: '17'
           cache: maven
 
-      # ✅ Step 3: Install Dependencies
       - name: Install Maven Dependencies
         run: |
           mvn clean install -DskipTests
 
-      # ✅ Step 4: Run API Tests Against Public Swagger URL (No Failure on Test Errors)
       - name: Run Tests Against Public Swagger API
         run: |
           mvn test -Dapi.base.url=https://petstore3.swagger.io/api/v3 || true
 
-      # ✅ Step 5: Upload Test Results
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v4
@@ -51,16 +46,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ✅ Step 1: Checkout Repository
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # ✅ Step 2: Ensure Test Results Directory Exists
-      - name: Create Test Results Directory
+      # ✅ Asegurar permisos correctos
+      - name: Set Directory Permissions
         run: |
           mkdir -p performance/test-results
+          chmod -R 777 performance
 
-      # ✅ Step 3: Run k6 Performance Test
+      # ✅ Ejecutar pruebas k6
       - name: Run k6 Performance Test with Docker
         run: |
           docker run --rm \
@@ -68,7 +63,7 @@ jobs:
             grafana/k6 run /scripts/petstore_tests.js \
             --out json=/scripts/test-results/k6_results.json
 
-      # ✅ Step 4: Upload k6 Performance Results
+      # ✅ Subir resultados
       - name: Upload k6 Test Results
         if: always()
         uses: actions/upload-artifact@v4
